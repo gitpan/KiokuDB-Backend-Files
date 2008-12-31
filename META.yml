@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               KiokuDB-Backend-Files
-version:            0.02_01
+version:            0.02_02
 abstract:           ~
 author:  []
 license:            unknown
@@ -11,7 +11,7 @@ requires:
     Directory::Transactional:  0
     File::Path:           2.07
     IO:                   1.2301
-    KiokuDB:              0.11
+    KiokuDB:              0.17
     Moose:                0
     MooseX::Types::Path::Class:  0
     Test::TempDir:        0
