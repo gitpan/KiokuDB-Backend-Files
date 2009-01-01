@@ -18,7 +18,7 @@ use MooseX::Types::Path::Class qw(Dir File);
 
 use namespace::clean -except => 'meta';
 
-our $VERSION = "0.02_02";
+our $VERSION = "0.02";
 
 with qw(
     KiokuDB::Backend
@@ -100,6 +100,7 @@ sub _build__txn_manager {
     );
 }
 
+sub txn_do { shift->_txn_manager->txn_do(@_) }
 sub txn_begin { shift->_txn_manager->txn_begin(@_) }
 sub txn_commit { shift->_txn_manager->txn_commit(@_) }
 sub txn_rollback { shift->_txn_manager->txn_rollback(@_) }

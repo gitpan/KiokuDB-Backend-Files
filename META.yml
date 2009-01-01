@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               KiokuDB-Backend-Files
-version:            0.02_02
+version:            0.02
 abstract:           ~
 author:  []
 license:            unknown
@@ -8,7 +8,7 @@ distribution_type:  module
 configure_requires:
     ExtUtils::MakeMaker:  0
 requires:
-    Directory::Transactional:  0
+    Directory::Transactional:  0.02
     File::Path:           2.07
     IO:                   1.2301
     KiokuDB:              0.17
