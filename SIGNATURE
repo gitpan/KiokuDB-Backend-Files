@@ -14,18 +14,18 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 6a2a550f774fe5b23ed8e14f8fd2e1d4cf9ffac9 Changes
+SHA1 53feee6fff9abc7c65355b55c71f3cf44eb0c5c5 Changes
 SHA1 8691ba0a51e740f7026848639489ead4186a69eb MANIFEST
 SHA1 190e9058eb9c6446a1a3f3ddf15b082f1ecde152 MANIFEST.SKIP
-SHA1 e9bd47338104ea511c24ec424b734c6428bc76dc META.yml
-SHA1 902c771932ad690fc2dcbc9f0bcab813585b99e9 Makefile.PL
-SHA1 6d523e371b6bb04bb537e5cacf73566a4c7138f5 lib/KiokuDB/Backend/Files.pm
+SHA1 26da698b3e2bf32d48649769c0a6437d033e232b META.yml
+SHA1 7f46f84c0adf051497047eb44ab48f5046014ec5 Makefile.PL
+SHA1 d0dc0fde53ddc7d759af4334335ebd71eb52697d lib/KiokuDB/Backend/Files.pm
 SHA1 5e4ce2ffc8e4f83ffcbd6c8274ecfc1131733b5a lib/KiokuDB/Backend/JSPON.pm
 SHA1 a1a5000deb9dbea37ffab6c4d54f6eeecb6259ba t/files.t
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.7 (Darwin)
 
-iD8DBQFJXPYVVCwRwOvSdBgRAqJSAJ9nq/6JUaUemohQ30rcd2cynUlXeQCfd1Ec
-uhRdCRgFfB8PXpGOkl+d4Ds=
-=kWJT
+iD8DBQFJXZH1VCwRwOvSdBgRAi+TAJ0cpj/vDhrBwBMFkwiU6bMzRrBxTACgpZzn
+KU+doiR3Oa7tOsvZ7u/ITXs=
+=jNQw
 -----END PGP SIGNATURE-----
