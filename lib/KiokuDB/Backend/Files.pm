@@ -18,7 +18,7 @@ use MooseX::Types::Path::Class qw(Dir File);
 
 use namespace::clean -except => 'meta';
 
-our $VERSION = "0.03";
+our $VERSION = "0.04";
 
 with qw(
     KiokuDB::Backend
@@ -173,6 +173,13 @@ sub insert_entry {
     my $file = $self->object_file($id);
 
     my $t = $self->_txn_manager;
+
+    $t->lock_path_write($file);
+
+    if ( not($entry->has_prev) and $t->exists($file) ) {
+        # this is a new entry
+        croak "Entry $id already exists";
+    }
 
     my $fh = $t->openw($file);
 
@@ -352,8 +359,8 @@ Yuval Kogman E<lt>nothingmuch@woobling.orgE<gt>
 
 =head1 COPYRIGHT
 
-    Copyright (c) 2008 Yuval Kogman, Infinity Interactive. All rights
-    reserved This program is free software; you can redistribute
+    Copyright (c) 2008, 2009 Yuval Kogman, Infinity Interactive. All
+    rights reserved This program is free software; you can redistribute
     it and/or modify it under the same terms as Perl itself.
 
 =cut
