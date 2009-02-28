@@ -16,9 +16,11 @@ use Data::Stream::Bulk::Util qw(bulk);
 
 use MooseX::Types::Path::Class qw(Dir File);
 
+sub _file_to_id_stream; # cleanup
+
 use namespace::clean -except => 'meta';
 
-our $VERSION = "0.04";
+our $VERSION = "0.05";
 
 with qw(
     KiokuDB::Backend
@@ -28,14 +30,13 @@ with qw(
     KiokuDB::Backend::Role::Query::Simple::Linear
     KiokuDB::Backend::Role::TXN
     KiokuDB::Backend::Role::TXN::Nested
+    KiokuDB::Backend::Role::Concurrency::POSIX
 );
 
 sub BUILD {
     my $self = shift;
 
-    if ( $self->create ) {
-        $self->create_dirs;
-    } else {
+    unless ( $self->create ) {
         my $dir = $self->dir;
         $dir->open || croak("$dir: $!");
     }
@@ -119,13 +120,19 @@ sub txn_rollback { shift->_txn_manager->txn_rollback(@_) }
 sub get {
     my ( $self, @uids ) = @_;
 
+    my $t = $self->_txn_manager->_auto_txn;
+
     return map { $self->get_entry($_) } @uids;
 }
 
 sub insert {
     my ( $self, @entries ) = @_;
 
-    foreach my $entry ( @entries ) {
+    # in case we're not in a transaction, make sure it's scoped for the entire insert
+    my $t = $self->_txn_manager->_auto_txn;
+
+    # we sort so that locks are taken in a consistent order, reducing chance of deadlocks
+    foreach my $entry ( sort { $a->id cmp $b->id } @entries ) {
         $self->insert_entry($entry);
     }
 }
@@ -137,17 +144,24 @@ sub delete {
 
     my $t = $self->_txn_manager;
 
+    my $g = $t->_auto_txn;
+
     foreach my $uid ( @uids ) {
         foreach my $file ( $self->object_file($uid), $self->root_set_file($uid) ) {
             $t->unlink($file);
         }
     }
+
+    return;
 }
 
 sub exists {
     my ( $self, @uids ) = @_;
 
     my $t = $self->_txn_manager;
+
+    my $g = $t->_auto_txn;
+
     map { $t->exists($self->object_file($_)) } @uids;
 }
 
@@ -229,13 +243,6 @@ sub root_set_file {
     $self->_trie_path( $self->root_set_dir, $uid );
 }
 
-sub create_dirs {
-    my $self = shift;
-
-    make_path( $self->object_dir );
-    make_path( $self->root_set_dir );
-}
-
 sub clear {
     my $self = shift;
 
@@ -248,36 +255,56 @@ sub clear {
     }
 }
 
-sub all_entries {
+sub all_entry_files {
     my $self = shift;
 
-    my $ser = $self->serializer;
-
-    my $t = $self->_txn_manager;
-
-    my $stream = $t->file_stream( only_files => 1, dir => $self->object_dir );
-
-    $stream->filter(sub { [ map { $ser->deserialize_from_stream($t->openr($_)) } @$_ ]});
+    $self->_txn_manager->file_stream( only_files => 1, dir => $self->object_dir );
 }
 
-# broken:
-sub root_entries {
+sub root_entry_files {
     my $self = shift;
 
-    my $ser = $self->serializer;
+    $self->_txn_manager->file_stream( only_files => 1, dir => $self->root_set_dir );
+}
 
-    my $t = $self->_txn_manager;
+sub _file_to_id_stream {
+    my $stream = shift;
 
-    my $stream = $t->file_stream( only_files => 1, dir => $self->root_set_dir );
-
-    my $ids = $stream->filter(sub {[
+    $stream->filter(sub {[
         map {
             my ( undef, undef, $file ) = File::Spec->splitpath($_);
             $file;
         } @$_
     ]});
+}
 
-    $ids->filter(sub{[ $self->get(@$_) ]});
+sub all_entry_ids {
+    my $self = shift;
+
+    _file_to_id_stream($self->all_entry_files);
+}
+
+sub root_entry_ids {
+    my $self = shift;
+
+    _file_to_id_stream($self->root_entry_files);
+}
+
+sub all_entries {
+    my $self = shift;
+
+    my $ser = $self->serializer;
+    my $t = $self->_txn_manager;
+
+    my $stream = $self->all_entry_files;
+
+    $stream->filter(sub { [ map { $ser->deserialize_from_stream($t->openr($_)) } @$_ ]});
+}
+
+# FIXME when we're no longer using empty files this should be fixed
+sub root_entries {
+    my $self = shift;
+    $self->root_entry_ids->filter(sub{[ $self->get(@$_) ]});
 }
 
 __PACKAGE__->meta->make_immutable;

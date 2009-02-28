@@ -14,7 +14,7 @@ WriteMakefile(
     PL_FILES     => { },
     PREREQ_PM    => {
         'Moose' => 0,
-        'KiokuDB' => '0.17',
+        'KiokuDB' => '0.24',
 
         'Test::TempDir' => 0,
 
@@ -23,6 +23,6 @@ WriteMakefile(
         'IO' => '1.2301', # binmode method
 
         'File::Path' => 2.07,
-        'Directory::Transactional' => '0.03',
+        'Directory::Transactional' => '0.06',
     },
 );
