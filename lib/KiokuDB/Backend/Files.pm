@@ -20,7 +20,7 @@ sub _file_to_id_stream; # cleanup
 
 use namespace::clean -except => 'meta';
 
-our $VERSION = "0.05";
+our $VERSION = "0.06";
 
 with qw(
     KiokuDB::Backend
@@ -122,7 +122,8 @@ sub get {
 
     my $t = $self->_txn_manager->_auto_txn;
 
-    return map { $self->get_entry($_) } @uids;
+    local $@;
+    return eval { map { $self->get_entry($_) } @uids };
 }
 
 sub insert {
